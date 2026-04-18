@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"otcountingbackend/internal/api"
 	"otcountingbackend/internal/repo"
@@ -12,11 +14,30 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func main() {
-	dsn := os.Getenv("DATABASE_URL")
-	if dsn == "" {
-		dsn = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+func envOrDefault(k, fallback string) string {
+	if v := os.Getenv(k); v != "" {
+		return v
 	}
+	return fallback
+}
+
+func dbDSN() string {
+	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
+		return dsn
+	}
+
+	host := envOrDefault("OPENGAUSS_HOST", "localhost")
+	port := envOrDefault("OPENGAUSS_PORT", "5432")
+	user := envOrDefault("OPENGAUSS_USER", "postgres")
+	pass := envOrDefault("OPENGAUSS_PASSWORD", "postgres")
+	db := envOrDefault("OPENGAUSS_DBNAME", "postgres")
+	ssl := envOrDefault("OPENGAUSS_SSLMODE", "disable")
+
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", url.QueryEscape(user), url.QueryEscape(pass), host, port, db, url.QueryEscape(ssl))
+}
+
+func main() {
+	dsn := dbDSN()
 	addr := os.Getenv("SERVER_ADDR")
 	if addr == "" {
 		addr = ":8080"
