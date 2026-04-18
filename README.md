@@ -197,7 +197,73 @@ Response: same `dailySummary` / `monthlySummary` structure as calculate endpoint
 
 ---
 
-## 3) Error format
+
+## 4) Run backend in Podman
+
+Yes — this backend runs fine in Podman.
+
+### Build image
+```bash
+podman build -t ot-backend:latest -f Containerfile .
+```
+
+### Option A: run backend on host network (Linux)
+This is easiest when your openGauss container already publishes `5432` to host.
+
+```bash
+podman run --rm -it \
+  --name ot-backend \
+  --network host \
+  -e SERVER_ADDR=':8080' \
+  -e OPENGAUSS_HOST='127.0.0.1' \
+  -e OPENGAUSS_PORT='5432' \
+  -e OPENGAUSS_USER='postgres' \
+  -e GS_PASSWORD='xxxxxx' \
+  -e OPENGAUSS_DBNAME='postgres' \
+  -e OPENGAUSS_SSLMODE='disable' \
+  ot-backend:latest
+```
+
+Then call API at `http://127.0.0.1:8080`.
+
+### Option B: run backend + openGauss in same podman network
+```bash
+podman network create ot-net
+
+# openGauss (name: opengauss)
+podman run -d \
+  --name opengauss \
+  --network ot-net \
+  --privileged=true \
+  --shm-size=1g \
+  -e GS_PASSWORD='xxxxxx' \
+  -v /data/opengauss:/var/lib/opengauss \
+  -p 5432:5432 \
+  docker.io/opengauss/opengauss-server:latest
+
+# backend
+podman run --rm -it \
+  --name ot-backend \
+  --network ot-net \
+  -p 8080:8080 \
+  -e SERVER_ADDR=':8080' \
+  -e OPENGAUSS_HOST='opengauss' \
+  -e OPENGAUSS_PORT='5432' \
+  -e OPENGAUSS_USER='postgres' \
+  -e GS_PASSWORD='xxxxxx' \
+  -e OPENGAUSS_DBNAME='postgres' \
+  -e OPENGAUSS_SSLMODE='disable' \
+  ot-backend:latest
+```
+
+### Migration from host
+After DB is up, run:
+```bash
+export DATABASE_URL='postgres://postgres:xxxxxx@127.0.0.1:5432/postgres?sslmode=disable'
+psql "$DATABASE_URL" -f internal/db/migrations/001_init.sql
+```
+
+## 5) Error format
 
 ```json
 {
