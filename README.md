@@ -1,5 +1,23 @@
 # OT Calculator Backend (Go + openGauss)
 
+
+## 0) New Ubuntu setup (Podman + tools)
+
+On a fresh Ubuntu host:
+
+```bash
+sudo apt update
+sudo apt install -y podman curl ca-certificates postgresql-client
+```
+
+Verify:
+```bash
+podman --version
+psql --version
+```
+
+> If `podman` is missing in your distro repo, enable the official Ubuntu updates repo first, then reinstall.
+
 This service stores OT/BREAK entries by AM/PM work session, calculates summaries, persists authoritative results, and optionally stores rendered HTML fragments as cache.
 
 ## 1) Quick start
@@ -242,6 +260,49 @@ podman run -d \
   docker.io/opengauss/opengauss-server:latest
 
 # backend
+podman run --rm -it \
+  --name ot-backend \
+  --network ot-net \
+  -p 8080:8080 \
+  -e SERVER_ADDR=':8080' \
+  -e OPENGAUSS_HOST='opengauss' \
+  -e OPENGAUSS_PORT='5432' \
+  -e OPENGAUSS_USER='postgres' \
+  -e GS_PASSWORD='xxxxxx' \
+  -e OPENGAUSS_DBNAME='postgres' \
+  -e OPENGAUSS_SSLMODE='disable' \
+  ot-backend:latest
+```
+
+
+### End-to-end on new Ubuntu (copy/paste)
+```bash
+# 1) clone project
+git clone <YOUR_REPO_URL> ot-backend
+cd ot-backend
+
+# 2) build backend image
+podman build -t ot-backend:latest -f Containerfile .
+
+# 3) create podman network
+podman network create ot-net || true
+
+# 4) run openGauss
+podman run -d \
+  --name opengauss \
+  --network ot-net \
+  --privileged=true \
+  --shm-size=1g \
+  -e GS_PASSWORD='xxxxxx' \
+  -v /data/opengauss:/var/lib/opengauss \
+  -p 5432:5432 \
+  docker.io/opengauss/opengauss-server:latest
+
+# 5) apply migration from host
+export DATABASE_URL='postgres://postgres:xxxxxx@127.0.0.1:5432/postgres?sslmode=disable'
+psql "$DATABASE_URL" -f internal/db/migrations/001_init.sql
+
+# 6) run backend container
 podman run --rm -it \
   --name ot-backend \
   --network ot-net \
