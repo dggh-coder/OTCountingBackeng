@@ -65,9 +65,6 @@ func (c *CalculateService) CalculateAndPersist(ctx context.Context, sessionID in
 			Rate20RoundedHours: r.Rate20RoundedHours,
 			Rate15Minutes:      r.Rate15Minutes,
 			Rate15RoundedHours: r.Rate15RoundedHours,
-			TotalOTMinutes:     r.TotalOTMinutes,
-			TotalBreakMinutes:  r.TotalBreakMinutes,
-			NetWorkMinutes:     r.NetWorkMinutes,
 			CalculatedAt:       now,
 		})
 	}

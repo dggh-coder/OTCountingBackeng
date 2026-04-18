@@ -27,6 +27,11 @@ You can configure DB in either of these ways:
 
 > If you are running in a container, put your openGauss password in `OPENGAUSS_PASSWORD` (or in `DATABASE_URL`), then start the server.
 
+If your container uses `GS_PASSWORD` (like `opengauss-server:latest`), export that into app env:
+```bash
+export OPENGAUSS_PASSWORD="$GS_PASSWORD"
+```
+
 Example:
 ```bash
 export OPENGAUSS_HOST=127.0.0.1
@@ -117,9 +122,6 @@ Response shape (same contract):
       "rate20RoundedHours": 3,
       "rate15Minutes": 135,
       "rate15RoundedHours": 3,
-      "totalOTMinutes": 150,
-      "totalBreakMinutes": 15,
-      "netWorkMinutes": 135,
       "calculatedAtUnixSec": 1770000000
     }
   ],
@@ -131,9 +133,6 @@ Response shape (same contract):
       "rate20RoundedHours": 3,
       "rate15Minutes": 135,
       "rate15RoundedHours": 3,
-      "totalOTMinutes": 150,
-      "totalBreakMinutes": 15,
-      "netWorkMinutes": 135,
       "calculatedAtUnixSec": 1770000000
     }
   ]
@@ -149,17 +148,14 @@ Response:
 {
   "results": [
     {
-      "SessionID": 2026042601,
-      "EmployeeID": "A",
-      "DateLabel": "2026-04-26",
-      "Rate20Minutes": 135,
-      "Rate20RoundedHours": 3,
-      "Rate15Minutes": 135,
-      "Rate15RoundedHours": 3,
-      "TotalOTMinutes": 150,
-      "TotalBreakMinutes": 15,
-      "NetWorkMinutes": 135,
-      "CalculatedAt": "2026-04-26T10:00:00Z"
+      "sessionId": 2026042601,
+      "employeeId": "A",
+      "dateLabel": "2026-04-26",
+      "rate20Minutes": 135,
+      "rate20RoundedHours": 3,
+      "rate15Minutes": 135,
+      "rate15RoundedHours": 3,
+      "calculatedAt": "2026-04-26T10:00:00Z"
     }
   ]
 }
@@ -172,12 +168,12 @@ Response:
 Response:
 ```json
 {
-  "SessionID": 2026042601,
-  "EmployeeID": "A",
-  "FragmentType": "DAILY_CARD",
-  "FormatVersion": 1,
-  "ContentHTML": "<div class=\"daily-card\"><strong>A</strong><span>135 mins</span></div>",
-  "LastCalculated": "2026-04-26T10:00:00Z"
+  "sessionId": 2026042601,
+  "employeeId": "A",
+  "fragmentType": "DAILY_CARD",
+  "formatVersion": 1,
+  "contentHtml": "<div class=\"daily-card\"><strong>A</strong><span>135 mins</span></div>",
+  "lastCalculated": "2026-04-26T10:00:00Z"
 }
 ```
 

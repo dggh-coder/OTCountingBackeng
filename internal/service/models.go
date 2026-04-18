@@ -18,33 +18,30 @@ type EntryPayload struct {
 }
 
 type SessionEntry struct {
-	SessionID  int64
-	ID         string
-	EmployeeID string
-	EntryType  string
-	StartTime  string
-	EndTime    string
+	SessionID  int64  `json:"sessionId"`
+	ID         string `json:"id"`
+	EmployeeID string `json:"employeeId"`
+	EntryType  string `json:"entryType"`
+	StartTime  string `json:"startTime"`
+	EndTime    string `json:"endTime"`
 }
 
 type ResultRecord struct {
-	SessionID          int64
-	EmployeeID         string
-	DateLabel          string
-	Rate20Minutes      int
-	Rate20RoundedHours int
-	Rate15Minutes      int
-	Rate15RoundedHours int
-	TotalOTMinutes     int
-	TotalBreakMinutes  int
-	NetWorkMinutes     int
-	CalculatedAt       time.Time
+	SessionID          int64     `json:"sessionId"`
+	EmployeeID         string    `json:"employeeId"`
+	DateLabel          string    `json:"dateLabel"`
+	Rate20Minutes      int       `json:"rate20Minutes"`
+	Rate20RoundedHours int       `json:"rate20RoundedHours"`
+	Rate15Minutes      int       `json:"rate15Minutes"`
+	Rate15RoundedHours int       `json:"rate15RoundedHours"`
+	CalculatedAt       time.Time `json:"calculatedAt"`
 }
 
 type RenderedFragment struct {
-	SessionID      int64
-	EmployeeID     string
-	FragmentType   string
-	FormatVersion  int
-	ContentHTML    string
-	LastCalculated time.Time
+	SessionID      int64     `json:"sessionId"`
+	EmployeeID     string    `json:"employeeId"`
+	FragmentType   string    `json:"fragmentType"`
+	FormatVersion  int       `json:"formatVersion"`
+	ContentHTML    string    `json:"contentHtml"`
+	LastCalculated time.Time `json:"lastCalculated"`
 }

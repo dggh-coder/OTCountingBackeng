@@ -29,7 +29,13 @@ func dbDSN() string {
 	host := envOrDefault("OPENGAUSS_HOST", "localhost")
 	port := envOrDefault("OPENGAUSS_PORT", "5432")
 	user := envOrDefault("OPENGAUSS_USER", "postgres")
-	pass := envOrDefault("OPENGAUSS_PASSWORD", "postgres")
+	pass := os.Getenv("OPENGAUSS_PASSWORD")
+	if pass == "" {
+		pass = os.Getenv("GS_PASSWORD")
+	}
+	if pass == "" {
+		pass = "postgres"
+	}
 	db := envOrDefault("OPENGAUSS_DBNAME", "postgres")
 	ssl := envOrDefault("OPENGAUSS_SSLMODE", "disable")
 

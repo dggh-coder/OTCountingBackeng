@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type SessionService struct {
@@ -68,7 +70,15 @@ func (s *SessionService) ReplaceEntries(ctx context.Context, sessionID int64, pa
 		if err := validateHHMM(p.EndTime); err != nil {
 			return err
 		}
-		rows = append(rows, SessionEntry{SessionID: sessionID, ID: p.ID, EmployeeID: p.Employee, EntryType: p.EntryType, StartTime: p.StartTime, EndTime: p.EndTime})
+
+		id := p.ID
+		if id == "" {
+			id = uuid.NewString()
+		} else if _, err := uuid.Parse(id); err != nil {
+			return ValidationError("id must be a valid UUID")
+		}
+
+		rows = append(rows, SessionEntry{SessionID: sessionID, ID: id, EmployeeID: p.Employee, EntryType: p.EntryType, StartTime: p.StartTime, EndTime: p.EndTime})
 	}
 	if err := s.Entries.ReplaceBySession(txCtx, sessionID, rows); err != nil {
 		return InternalError("failed to replace entries")
