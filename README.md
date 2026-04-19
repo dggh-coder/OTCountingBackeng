@@ -253,6 +253,10 @@ Yes — this backend runs fine in Podman.
 podman build -t ot-backend:latest -f Containerfile .
 ```
 
+This `Containerfile` is intentionally pinned to fully-qualified base image names and is safe for Podman hosts with no short-name registry aliases.
+
+If you see `short-name ... did not resolve to an alias`, your server blocks unqualified images. This repo already uses fully-qualified base images in `Containerfile`; if pulling manually, use full names like `docker.io/library/golang:1.23-alpine`.
+
 ### Option A: run backend on host network (Linux)
 This is easiest when your openGauss container already publishes `5432` to host.
 
