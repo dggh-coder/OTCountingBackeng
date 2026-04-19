@@ -20,6 +20,34 @@ psql --version
 
 This service stores OT/BREAK entries by AM/PM work session, calculates summaries, persists authoritative results, and optionally stores rendered HTML fragments as cache.
 
+
+## 0b) New openEuler setup (Podman + tools)
+
+On a fresh openEuler server:
+
+```bash
+sudo dnf -y update
+sudo dnf -y install podman git curl ca-certificates postgresql
+```
+
+Enable/start Podman service pieces (safe to run even if already enabled):
+```bash
+sudo systemctl enable --now podman.socket || true
+sudo systemctl enable --now podman.service || true
+```
+
+Verify install:
+```bash
+podman --version
+psql --version
+```
+
+(Optional, rootless quality-of-life)
+```bash
+# allows lingering user services after logout
+sudo loginctl enable-linger "$USER"
+```
+
 ## 1) Quick start
 
 ### Prerequisites
@@ -274,6 +302,49 @@ podman run --rm -it \
   ot-backend:latest
 ```
 
+
+
+### End-to-end on new openEuler (copy/paste)
+```bash
+# 1) clone project
+git clone <YOUR_REPO_URL> ot-backend
+cd ot-backend
+
+# 2) build backend image
+podman build -t ot-backend:latest -f Containerfile .
+
+# 3) create podman network
+podman network create ot-net || true
+
+# 4) run openGauss
+podman run -d \
+  --name opengauss \
+  --network ot-net \
+  --privileged=true \
+  --shm-size=1g \
+  -e GS_PASSWORD='xxxxxx' \
+  -v /data/opengauss:/var/lib/opengauss \
+  -p 5432:5432 \
+  docker.io/opengauss/opengauss-server:latest
+
+# 5) apply migration from host
+export DATABASE_URL='postgres://postgres:xxxxxx@127.0.0.1:5432/postgres?sslmode=disable'
+psql "$DATABASE_URL" -f internal/db/migrations/001_init.sql
+
+# 6) run backend container
+podman run --rm -it \
+  --name ot-backend \
+  --network ot-net \
+  -p 8080:8080 \
+  -e SERVER_ADDR=':8080' \
+  -e OPENGAUSS_HOST='opengauss' \
+  -e OPENGAUSS_PORT='5432' \
+  -e OPENGAUSS_USER='postgres' \
+  -e GS_PASSWORD='xxxxxx' \
+  -e OPENGAUSS_DBNAME='postgres' \
+  -e OPENGAUSS_SSLMODE='disable' \
+  ot-backend:latest
+```
 
 ### End-to-end on new Ubuntu (copy/paste)
 ```bash
