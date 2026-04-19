@@ -113,6 +113,8 @@ Default listen address: `:8080` (override with `SERVER_ADDR`).
 
 ## 2) API list + methods + responses
 
+For full frontend integration details, see: `docs/API_CONTRACT.md`.
+
 Base URL examples assume `http://localhost:8080`.
 
 ### A. Create or get session
